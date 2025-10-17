@@ -111,7 +111,41 @@ jobs:
           # Install dependencies and configure Laravel
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
             cd /var/www/html/api
+            
+            # Set proper ownership for configuration
+            sudo chown -R ubuntu:ubuntu /var/www/html/api
+            
+            # Install dependencies
             composer install --no-dev --optimize-autoloader
+            
+            # Create .env file if it doesn't exist
+            if [ ! -f .env ]; then
+              cp .env.example .env
+            fi
+            
+            # Generate application key if not set
+            if ! grep -q "APP_KEY=base64:" .env; then
+              php artisan key:generate
+            fi
+            
+            # Update .env with GitHub secrets if provided
+            if [ -n "${{ secrets.DB_PASSWORD }}" ]; then
+              sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=${{ secrets.DB_PASSWORD }}/" .env
+            fi
+            
+            if [ -n "${{ secrets.DB_USERNAME }}" ]; then
+              sed -i "s/DB_USERNAME=.*/DB_USERNAME=${{ secrets.DB_USERNAME }}/" .env
+            fi
+            
+            if [ -n "${{ secrets.DB_DATABASE }}" ]; then
+              sed -i "s/DB_DATABASE=.*/DB_DATABASE=${{ secrets.DB_DATABASE }}/" .env
+            fi
+            
+            # Set APP_ENV to production for deployment
+            sed -i "s/APP_ENV=.*/APP_ENV=production/" .env
+            sed -i "s/APP_DEBUG=.*/APP_DEBUG=false/" .env
+            
+            # Configure Laravel for production
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
