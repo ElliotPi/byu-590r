@@ -76,7 +76,7 @@ jobs:
           php artisan key:generate
           sed -i 's/DB_HOST=mysql/DB_HOST=127.0.0.1/' .env
           sed -i 's/DB_DATABASE=byu_590r_app/DB_DATABASE=byu_590r_app_test/' .env
-          echo "DEBUG_MODE=true" >> .env
+          echo "APP_DEBUG=true" >> .env
 
       - name: Run Laravel tests
         run: |
@@ -142,8 +142,7 @@ jobs:
             
             # Set APP_ENV to production for deployment
             sed -i "s/APP_ENV=.*/APP_ENV=production/" .env
-            sed -i "s/APP_DEBUG=.*/APP_DEBUG=false/" .env
-            echo "DEBUG_MODE=true" >> .env
+            echo "APP_DEBUG=true" >> .env
             
             # Use make commands for deployment
             make setup-backend-ec2
