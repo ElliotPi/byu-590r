@@ -339,6 +339,13 @@ sudo chmod -R 755 /var/www/html/api
 sudo chmod -R 775 /var/www/html/api/storage
 sudo chmod -R 775 /var/www/html/api/bootstrap/cache
 
+# Create .env file if it doesn't exist
+if [ ! -f /var/www/html/api/.env ]; then
+    sudo cp /var/www/html/api/.env.example /var/www/html/api/.env
+    sudo chown www-data:www-data /var/www/html/api/.env
+    sudo chmod 644 /var/www/html/api/.env
+fi
+
 echo "Server setup complete! Ready for GitHub Actions deployment."
 EOF
     
