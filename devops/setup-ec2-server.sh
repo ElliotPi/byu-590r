@@ -57,6 +57,33 @@ check_prerequisites() {
     log_success "Prerequisites check passed"
 }
 
+# Cleanup existing instances
+cleanup_existing_instances() {
+    log_info "Checking for existing EC2 instances..."
+    
+    # Get all running instances with the project name tag
+    EXISTING_INSTANCES=$(aws ec2 describe-instances \
+        --filters "Name=tag:Name,Values=$PROJECT_NAME-server" "Name=instance-state-name,Values=running,pending" \
+        --query 'Reservations[*].Instances[*].InstanceId' \
+        --output text)
+    
+    if [ -n "$EXISTING_INSTANCES" ]; then
+        log_warning "Found existing instances: $EXISTING_INSTANCES"
+        log_info "Terminating existing instances to prevent duplicates..."
+        
+        # Terminate existing instances
+        aws ec2 terminate-instances --instance-ids $EXISTING_INSTANCES
+        
+        # Wait for termination to complete
+        log_info "Waiting for instances to terminate..."
+        aws ec2 wait instance-terminated --instance-ids $EXISTING_INSTANCES
+        
+        log_success "Existing instances terminated"
+    else
+        log_info "No existing instances found"
+    fi
+}
+
 # Create EC2 instance
 create_ec2_instance() {
     log_info "Creating EC2 instance..."
@@ -210,6 +237,7 @@ main() {
     log_info "Starting BYU 590R Server Setup..."
     
     check_prerequisites
+    cleanup_existing_instances
     create_ec2_instance
     setup_ec2_dependencies
     
