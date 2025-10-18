@@ -7,8 +7,8 @@
 set -e
 
 # Load environment variables if .env file exists
-if [ -f "$(dirname "$0")/.env" ]; then
-    source "$(dirname "$0")/.env"
+if [ -f "$(dirname "$0")/../.env" ]; then
+    source "$(dirname "$0")/../.env"
 fi
 
 # Colors for output
@@ -96,7 +96,7 @@ create_ec2_instance() {
         --query 'Instances[0].InstanceId' \
         --output text)
     
-    echo "INSTANCE_ID=$INSTANCE_ID" > .server-config
+    echo "INSTANCE_ID=$INSTANCE_ID" > ../.server-config
     
     log_info "Waiting for instance to be running..."
     aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
@@ -107,7 +107,7 @@ create_ec2_instance() {
         --query 'Reservations[0].Instances[0].PublicIpAddress' \
         --output text)
     
-    echo "INSTANCE_IP=$INSTANCE_IP" >> .server-config
+    echo "INSTANCE_IP=$INSTANCE_IP" >> ../.server-config
     
     # Check for existing Elastic IP or create new one
     log_info "Checking for Elastic IP..."
@@ -140,12 +140,12 @@ create_ec2_instance() {
         --query 'Addresses[0].PublicIp' \
         --output text)
     
-    echo "ELASTIC_IP=$ELASTIC_IP" >> .server-config
-    echo "ALLOCATION_ID=$ALLOCATION_ID" >> .server-config
+    echo "ELASTIC_IP=$ELASTIC_IP" >> ../.server-config
+    echo "ALLOCATION_ID=$ALLOCATION_ID" >> ../.server-config
     
     # Use Elastic IP as the primary host (more stable than dynamic IP)
     EC2_HOST="$ELASTIC_IP"
-    echo "EC2_HOST=$EC2_HOST" >> .server-config
+    echo "EC2_HOST=$EC2_HOST" >> ../.server-config
     
     # Configure security group to allow HTTP, HTTPS, SSH, and custom ports
     log_info "Configuring security group..."
@@ -212,7 +212,7 @@ create_s3_bucket() {
         log_success "S3 bucket '$BUCKET_NAME' created successfully with tags"
     fi
     
-    echo "S3_BUCKET=$BUCKET_NAME" >> .server-config
+    echo "S3_BUCKET=$BUCKET_NAME" >> ../.server-config
 }
 
 # Setup EC2 instance with dependencies only
@@ -415,8 +415,8 @@ main() {
     echo ""
     
     # Load configuration from .server-config
-    if [ -f ".server-config" ]; then
-        source .server-config
+    if [ -f "../.server-config" ]; then
+        source ../.server-config
     fi
     
     log_info "Server Details:"
@@ -461,7 +461,7 @@ main() {
     echo "     S3_BUCKET: $S3_BUCKET"
     echo "     INSTANCE_ID: $INSTANCE_ID"
     echo ""
-    log_info "Configuration saved to: .server-config"
+    log_info "Configuration saved to: ../.server-config"
     
     # Final cleanup - ensure no temporary files remain
     log_info "Final cleanup..."

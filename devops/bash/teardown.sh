@@ -31,9 +31,9 @@ log_error() {
 
 # Check if config file exists or find project resources
 check_config() {
-    if [ -f ".server-config" ]; then
+    if [ -f "../.server-config" ]; then
         # Load configuration from file
-        source .server-config
+        source ../.server-config
         
         log_info "Loaded configuration from .server-config:"
         echo "  Instance ID: $INSTANCE_ID"
@@ -48,7 +48,7 @@ check_config() {
             echo "  S3 Bucket: $S3_BUCKET"
         fi
     else
-        log_warning "Configuration file .server-config not found"
+        log_warning "Configuration file ../.server-config not found"
         log_info "Searching for BYU 590R project resources..."
         
         # Find project instances
@@ -355,9 +355,9 @@ show_cost_summary() {
 cleanup_config() {
     log_info "Cleaning up configuration file..."
     
-    if [ -f ".server-config" ]; then
-        rm -f .server-config
-        log_success "Configuration file .server-config deleted"
+    if [ -f "../.server-config" ]; then
+        rm -f ../.server-config
+        log_success "Configuration file ../.server-config deleted"
     else
         log_info "No configuration file to clean up"
     fi

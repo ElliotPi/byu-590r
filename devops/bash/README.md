@@ -1,6 +1,20 @@
 # DevOps Scripts
 
-This directory contains scripts for setting up and managing the BYU 590R application infrastructure.
+This directory contains bash scripts for setting up and managing the BYU 590R application infrastructure.
+
+## Directory Structure
+
+```
+devops/
+├── bash/                    # Shell scripts and documentation
+│   ├── setup-ec2-server.sh # EC2 server setup script
+│   ├── teardown.sh         # Resource cleanup script
+│   └── README.md           # This documentation
+├── terraform/              # Terraform infrastructure as code
+├── .env                    # Environment variables (if exists)
+├── .server-config          # Generated server configuration
+└── env.example             # Environment variables template
+```
 
 ## Current Setup
 

@@ -13,8 +13,22 @@ Laravel backend + Angular frontend with AWS EC2 deployment.
 - Node.js 18+ (for Angular development)
 - Make (for running commands)
 - AWS CLI (for EC2 deployment)
+- Terraform (for infrastructure management)
 
 ## Quick Start
+
+### 0. Install Terraform (if not already installed)
+
+**On macOS:**
+
+```bash
+brew install terraform
+```
+
+**On Linux/Windows:**
+
+- Download from [terraform.io](https://terraform.io/downloads)
+- Or use package manager: `sudo apt install terraform` (Ubuntu/Debian)
 
 ### 1. Setup EC2 Server
 
