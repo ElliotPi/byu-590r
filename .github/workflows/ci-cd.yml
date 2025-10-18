@@ -155,6 +155,9 @@ jobs:
               chmod 644 .env
             fi
             
+            # Fix DB_HOST for server deployment (change from mysql to localhost)
+            sed -i "s/DB_HOST=mysql/DB_HOST=localhost/" .env
+            
             # Update .env with GitHub secrets if provided
             if [ -n "${{ secrets.DB_PASSWORD }}" ]; then
               sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=${{ secrets.DB_PASSWORD }}/" .env
@@ -191,6 +194,10 @@ jobs:
             php artisan key:generate --show > /tmp/app_key
             sed -i "s/APP_KEY=.*/APP_KEY=$(cat /tmp/app_key)/" .env
             rm /tmp/app_key
+            
+            # Clear config cache to ensure new key is loaded
+            rm -f bootstrap/cache/config.php
+            php artisan config:clear
             
             # Run database migrations
             php artisan migrate --force
@@ -264,6 +271,11 @@ jobs:
             php artisan key:generate --show > /tmp/app_key
             sed -i "s/APP_KEY=.*/APP_KEY=$(cat /tmp/app_key)/" .env
             rm /tmp/app_key
+            
+            # Clear config cache to ensure new key is loaded
+            rm -f bootstrap/cache/config.php
+            php artisan config:clear
+            
             sudo chown -R www-data:www-data .
             sudo chmod -R 755 .
             sudo chmod -R 775 storage bootstrap/cache
