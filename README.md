@@ -1,119 +1,174 @@
 # BYU 590R Monorepo
 
-A student-friendly monorepo project with Laravel backend, Angular frontend, and AWS deployment.
+Laravel backend + Angular frontend with AWS EC2 deployment.
 
-## Features
+**Requirements:**
 
-- **Laravel Backend**: RESTful API with MySQL database
-- **Angular Frontend**: Modern web application with TypeScript
-- **AWS Infrastructure**: EC2 instance with Nginx, PHP, Node.js, MySQL
-- **GitHub Actions CI/CD**: Automated testing and deployment
-- **Cost Optimized**: ~$0-2/month with free tier usage
+- AWS subscription required
+- GitHub Teams subscription recommended for full functionality
+
+**Local Development Requirements:**
+
+- Docker & Docker Compose
+- Node.js 18+ (for Angular development)
+- Make (for running commands)
+- AWS CLI (for EC2 deployment)
 
 ## Quick Start
 
-### Local Development
+### 1. Setup EC2 Server
 
-1. **Start all services**:
+```bash
+cd devops
+chmod +x setup-ec2-server.sh
+./setup-ec2-server.sh
+```
 
+### 2. Configure GitHub Actions
+
+Add these secrets to your GitHub repository:
+
+- `EC2_HOST`: Your EC2 public IP address for deployment
+- `EC2_SSH_PRIVATE_KEY`: Contents of your SSH private key for server access
+- `DB_DATABASE`: Database name for the Laravel application
+- `DB_USERNAME`: Database username for MySQL connection
+- `DB_PASSWORD`: Database password for MySQL connection
+- `APP_DEBUG`: Laravel debug mode setting (true/false)
+- `OPENAI_API_KEY`: OpenAI API key for AI features (optional)
+- `AWS_ACCESS_KEY_ID`: AWS access key for AWS services
+- `AWS_SECRET_ACCESS_KEY`: AWS secret key for AWS services
+- `AWS_REGION`: AWS region for AWS services
+
+#### AWS IAM Setup
+
+1. **Create IAM User**:
+
+   - Go to AWS Console → IAM → Users → Create User
+   - Username: `byu-590r-deploy`
+   - Attach policies directly
+
+2. **Required Policies**:
+
+   ```json
+   {
+   	"Version": "2012-10-17",
+   	"Statement": [
+   		{
+   			"Effect": "Allow",
+   			"Action": [
+   				"ec2:RunInstances",
+   				"ec2:TerminateInstances",
+   				"ec2:DescribeInstances",
+   				"ec2:DescribeImages",
+   				"ec2:DescribeSecurityGroups",
+   				"ec2:AuthorizeSecurityGroupIngress",
+   				"ec2:AllocateAddress",
+   				"ec2:AssociateAddress",
+   				"ec2:DescribeAddresses",
+   				"ec2:CreateTags",
+   				"ec2:DescribeTags"
+   			],
+   			"Resource": "*"
+   		}
+   	]
+   }
+   ```
+
+3. **Generate Access Keys**:
+
+   - Go to IAM → Users → `byu-590r-deploy` → Security credentials
+   - Create access key → Command Line Interface (CLI)
+   - Download CSV file
+
+4. **Configure Local AWS CLI**:
+
+   ```bash
+   aws configure
+   # Enter Access Key ID, Secret Access Key, Region (us-west-1), Output format (json)
+   ```
+
+5. **Add to GitHub Secrets**:
+   - Repository → Settings → Secrets and variables → Actions
+   - Add `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` from CSV file
+
+#### OpenAI API Setup (Optional)
+
+1. **Create OpenAI Account**:
+
+   - Go to [platform.openai.com](https://platform.openai.com)
+   - Sign up or log in to your account
+
+2. **Add Credits/Billing**:
+
+   - Go to Billing → Payment methods
+   - Add a credit card or purchase credits
+   - Minimum: $5 credit for testing
+   - Recommended: $10-20 for development
+
+3. **Generate API Key**:
+
+   - Go to API Keys section in your OpenAI dashboard
+   - Click "Create new secret key"
+   - Name: `byu-590r-project`
+   - Copy the key (starts with `sk-`)
+
+4. **Add to GitHub Secrets**:
+
+   - Repository → Settings → Secrets and variables → Actions
+   - Add `OPENAI_API_KEY` with your generated key
+
+5. **Add to Local Environment** (optional):
+   ```bash
+   # Add to backend/.env file
+   OPENAI_API_KEY=sk-your-key-here
+   ```
+
+### 3. Deploy
+
+Push to `main` branch - GitHub Actions will auto-deploy.
+
+### 4. Verify Deployment
+
+- **Frontend**: `http://YOUR_EC2_IP`
+- **Backend API**: `http://YOUR_EC2_IP:4444/api/hello`
+
+### 5. Cleanup
+
+```bash
+cd devops
+./teardown.sh
+```
+
+## Local Development
+
+### Setup Environment
+
+1. **Copy environment file**:
+
+   ```bash
+   cp backend/.env.example backend/.env
+   ```
+
+2. **Configure database settings** (optional - Docker handles this):
+
+   ```bash
+   # Edit backend/.env if needed
+   DB_CONNECTION=mysql
+   DB_HOST=mysql
+   DB_PORT=3306
+   DB_DATABASE=byu_590r_app
+   DB_USERNAME=byu_user
+   DB_PASSWORD=byu_password
+   ```
+
+3. **Start development environment**:
    ```bash
    make start
    ```
 
-2. **Access the application**:
-   - Frontend: http://localhost:4200 (development)
-   - Backend API: http://localhost:8000
-   - Database: localhost:3306
+- Frontend: http://localhost:4200
+- Backend API: http://localhost:8000
 
-### AWS Deployment
+## Credits
 
-1. **Setup EC2 server** (one-time setup):
-
-   ```bash
-   cd devops
-   chmod +x setup-ec2-server.sh
-   ./setup-ec2-server.sh
-   ```
-
-2. **Configure GitHub Actions**:
-
-   - Add these secrets to your GitHub repository:
-     - `EC2_HOST`: Your EC2 public IP address for deployment
-     - `EC2_SSH_PRIVATE_KEY`: Contents of your SSH private key for server access
-     - `DB_DATABASE`: Database name for the Laravel application
-     - `DB_USERNAME`: Database username for MySQL connection
-     - `DB_PASSWORD`: Database password for MySQL connection
-     - `APP_DEBUG`: Laravel debug mode setting (true/false)
-     - `OPENAI_API_KEY`: OpenAI API key for AI features (optional)
-     - `AWS_ACCESS_KEY_ID`: AWS access key for AWS services
-     - `AWS_SECRET_ACCESS_KEY`: AWS secret key for AWS services
-     - `AWS_REGION`: AWS region for AWS services
-   - See `.github/README.md` for detailed instructions
-
-3. **Deploy via GitHub Actions**:
-
-   - Push changes to `main` branch
-   - GitHub Actions will automatically test and deploy
-   - Check the Actions tab for deployment status
-
-4. **Access your application**:
-
-   - Frontend: `http://YOUR_EC2_IP`
-   - Backend API: `http://YOUR_EC2_IP/api`
-
-5. **Clean up when done**:
-   ```bash
-   cd devops
-   chmod +x teardown.sh
-   ./teardown.sh
-   ```
-
-## Available Commands
-
-### Local Development
-
-- `make start` - Start local development environment
-- `make build-images` - Build Docker images for deployment
-- `make help` - Show all available commands
-
-### AWS Deployment
-
-- `cd devops && ./setup-ec2-server.sh` - Setup EC2 server (one-time)
-- `cd devops && ./teardown.sh` - Clean up all AWS resources
-
-## Project Structure
-
-```
-├── backend/          # Laravel API
-├── web-app/          # Angular frontend
-├── .github/workflows/ # GitHub Actions CI/CD
-│   └── ci-cd.yml     # Main CI/CD pipeline
-├── devops/           # AWS deployment configurations
-│   ├── setup-ec2-server.sh # EC2 server setup
-│   ├── teardown.sh   # AWS cleanup script
-│   └── fix-github-actions-iam.sh # IAM permissions fix
-├── ULTRA_CHEAP_SETUP.md # Manual setup guide
-└── Makefile         # Development commands
-```
-
-## API Endpoints
-
-- `GET /api/hello` - Hello World endpoint
-- `GET /api/health` - Health check endpoint
-
-## Documentation
-
-- **[ULTRA_CHEAP_SETUP.md](ULTRA_CHEAP_SETUP.md)** - Complete ultra-cheap setup guide (~$0-2/month)
-
-## Learning Objectives
-
-This project teaches:
-
-- Web application deployment (Laravel + Angular)
-- Database management (MySQL installation and configuration)
-- AWS managed services (EC2)
-- CI/CD with GitHub Actions
-- Server configuration and automation
-- Infrastructure management
-
-Perfect for learning modern DevOps practices at minimal cost!
+This project was created for BYU IS 590R - John Christiansen
