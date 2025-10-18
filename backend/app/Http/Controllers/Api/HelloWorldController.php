@@ -41,6 +41,17 @@ class HelloWorldController extends Controller
     {
         try {
             $bucketName = env('S3_BUCKET', 'byu-590r-' . time() . '-fallback');
+            
+            // Check if S3 bucket is configured
+            if (empty($bucketName)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'S3 bucket not configured',
+                    'bucket' => null,
+                    'timestamp' => now()->toISOString()
+                ], 500);
+            }
+            
             $testFileName = 'test-file-' . time() . '.txt';
             $testContent = 'This is a test file for BYU 590R S3 operations. Created at: ' . now()->toISOString();
             

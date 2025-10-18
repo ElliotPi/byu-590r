@@ -73,13 +73,15 @@ class S3Test extends TestCase
      */
     public function test_s3_operations_without_credentials(): void
     {
-        // Temporarily clear AWS credentials
+        // Temporarily clear AWS credentials and bucket
         $originalKey = env('AWS_ACCESS_KEY_ID');
         $originalSecret = env('AWS_SECRET_ACCESS_KEY');
+        $originalBucket = env('S3_BUCKET');
         
-        // Set empty credentials
+        // Set empty credentials and bucket
         config(['filesystems.disks.s3.key' => '']);
         config(['filesystems.disks.s3.secret' => '']);
+        config(['filesystems.disks.s3.bucket' => '']);
         
         $response = $this->get('/api/test-s3');
         
@@ -92,5 +94,6 @@ class S3Test extends TestCase
         // Restore original credentials
         config(['filesystems.disks.s3.key' => $originalKey]);
         config(['filesystems.disks.s3.secret' => $originalSecret]);
+        config(['filesystems.disks.s3.bucket' => $originalBucket]);
     }
 }
