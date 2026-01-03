@@ -16,9 +16,9 @@
   </mat-card>
   }
 
-  <mat-grid-list cols="4" rowHeight="1:1.5" gutterSize="16px">
+  <mat-grid-list cols="4" rowHeight="600px" gutterSize="16px">
     @for (book of books(); track book.id) {
-    <mat-grid-tile>
+    <mat-grid-tile class="book-grid-tile">
       <mat-card class="book-card">
         <mat-card-header>
           <mat-card-title>{{ book.name }}</mat-card-title>
@@ -44,8 +44,19 @@
 
           @if (book.authors && book.authors.length > 0) {
           <div class="authors-section">
-            <strong>By:</strong>
-            <ul>
+            <button
+              mat-button
+              class="authors-toggle"
+              (click)="toggleAuthors(book.id)"
+              type="button"
+            >
+              <mat-icon>{{
+                isAuthorsExpanded(book.id) ? "expand_less" : "expand_more"
+              }}</mat-icon>
+              <strong>By: ({{ book.authors.length }})</strong>
+            </button>
+            @if (isAuthorsExpanded(book.id)) {
+            <ul class="authors-list">
               @for (author of book.authors; track author.id) {
               <li>
                 {{ author.first_name }} {{ author.last_name }}
@@ -59,6 +70,7 @@
               </li>
               }
             </ul>
+            }
           </div>
           }
 

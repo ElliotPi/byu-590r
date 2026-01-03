@@ -13,58 +13,198 @@
 }
 
 .book-card {
+  width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+.book-grid-tile {
+  padding: spacing.$spacing-small;
+  display: flex;
+  align-items: stretch;
+}
+
+mat-card-header {
+  flex-shrink: 0;
+  padding: spacing.$spacing-small spacing.$spacing-medium;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 60px;
+}
+
+mat-card-content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: spacing.$spacing-small spacing.$spacing-medium
+    spacing.$spacing-extra-small;
+  min-height: 0;
+  max-height: 100%;
+  margin-bottom: 0;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: colors.$colors-light-grey;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: colors.$colors-medium-grey;
+    border-radius: 3px;
+
+    &:hover {
+      background: colors.$colors-dark-grey;
+    }
+  }
+}
+
+mat-card-actions {
+  flex-shrink: 0;
+  padding: spacing.$spacing-extra-small spacing.$spacing-medium
+    spacing.$spacing-small;
+  display: flex;
+  gap: spacing.$spacing-small;
+  flex-wrap: wrap;
+  margin-top: 0;
 }
 
 .book-actions {
   display: flex;
   gap: spacing.$spacing-extra-small;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+mat-card-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  @include fonts.fonts-h3;
 }
 
 .book-description {
-  margin-bottom: spacing.$spacing-medium;
+  margin-bottom: spacing.$spacing-small;
+  @include fonts.fonts-body;
+  color: colors.$colors-text-primary;
+  line-height: fonts.$line-height-normal;
 }
 
 .authors-section {
-  margin-bottom: spacing.$spacing-medium;
+  margin-bottom: spacing.$spacing-small;
+  @include fonts.fonts-caption;
 
-  ul {
+  .authors-toggle {
+    display: flex;
+    align-items: center;
+    gap: spacing.$spacing-extra-small;
+    padding: spacing.$spacing-extra-small spacing.$spacing-small;
+    min-width: auto;
+    width: 100%;
+    text-align: left;
+    color: colors.$colors-text-primary;
+    @include fonts.fonts-caption;
+    font-weight: fonts.$font-weight-medium;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      transition: transform 0.2s;
+    }
+
+    strong {
+      font-weight: fonts.$font-weight-medium;
+      color: colors.$colors-text-primary;
+    }
+
+    &:hover {
+      background-color: colors.$colors-light-grey;
+    }
+  }
+
+  .authors-list {
     list-style: none;
-    padding-left: 0;
+    padding-left: spacing.$spacing-medium;
+    margin-top: spacing.$spacing-extra-small;
+    margin-bottom: 0;
+    animation: slideDown 0.2s ease-out;
   }
 
   li {
-    margin-bottom: spacing.$spacing-small;
+    margin-bottom: spacing.$spacing-extra-small;
+    color: colors.$colors-text-secondary;
+    @include fonts.fonts-caption;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
   }
 }
 
 .phones {
-  margin-left: spacing.$spacing-medium;
-  font-size: 0.9rem;
-  color: colors.$colors-ui-grey;
+  margin-left: spacing.$spacing-small;
+  font-size: fonts.$font-size-xs;
+  color: colors.$colors-text-secondary;
+  margin-top: spacing.$spacing-extra-small;
 }
 
 .book-image-container {
   text-align: center;
-  margin: spacing.$spacing-medium 0;
+  margin: spacing.$spacing-small 0;
+  flex-shrink: 0;
 }
 
 .book-image {
-  width: 300px;
-  height: 400px;
-  object-fit: cover;
+  max-width: 100%;
+  height: auto;
+  max-height: 300px;
+  width: auto;
+  object-fit: contain;
   border-radius: spacing.$border-radius-small;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: block;
+  margin: 0 auto;
 
   &.checked-out-image {
-    opacity: 0.25;
+    opacity: 0.4;
+    filter: grayscale(50%);
   }
 }
 
 .checked-out-label {
-  color: red;
-  font-weight: bold;
+  color: colors.$colors-error;
+  font-weight: fonts.$font-weight-semibold;
+  @include fonts.fonts-caption;
+  text-align: center;
+  margin: spacing.$spacing-small 0 0 0;
+}
+
+mat-card-content h3 {
+  @include fonts.fonts-caption;
+  color: colors.$colors-text-primary;
+  text-align: center;
+  margin: spacing.$spacing-small 0 0 0;
+  font-weight: fonts.$font-weight-medium;
 }
 
 .modal {

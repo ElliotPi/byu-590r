@@ -79,6 +79,7 @@ export class BooksComponent implements OnInit {
   bookIsCreating = signal(false);
   selectedFile = signal<File | null>(null);
   selectedEditFile = signal<File | null>(null);
+  expandedAuthors = signal<Set<number>>(new Set());
 
   constructor() {
     this.newBookForm = this.fb.group({
@@ -326,4 +327,18 @@ export class BooksComponent implements OnInit {
   isMobile = isMobile;
 
   getFieldError = getFieldError;
+
+  toggleAuthors(bookId: number): void {
+    const expanded = new Set(this.expandedAuthors());
+    if (expanded.has(bookId)) {
+      expanded.delete(bookId);
+    } else {
+      expanded.add(bookId);
+    }
+    this.expandedAuthors.set(expanded);
+  }
+
+  isAuthorsExpanded(bookId: number): boolean {
+    return this.expandedAuthors().has(bookId);
+  }
 }
