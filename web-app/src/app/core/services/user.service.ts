@@ -13,7 +13,7 @@ export interface User {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserService {
   private http = inject(HttpClient);
@@ -33,7 +33,6 @@ export class UserService {
     if (user && user.token) {
       return {
         Authorization: `Bearer ${user.token}`,
-        'Content-Type': 'multipart/form-data'
       };
     }
     return {};
@@ -46,21 +45,34 @@ export class UserService {
     );
   }
 
-  uploadAvatar(image: File): Observable<{ success: boolean; results: { avatar: string }; message: string }> {
+  uploadAvatar(
+    image: File
+  ): Observable<{
+    success: boolean;
+    results: { avatar: string };
+    message: string;
+  }> {
     const formData = new FormData();
     formData.append('image', image);
-    return this.http.post<{ success: boolean; results: { avatar: string }; message: string }>(
-      `${this.apiUrl}user/upload_avatar`,
-      formData,
-      { headers: this.getMultipartAuthHeaders() }
-    );
+    return this.http.post<{
+      success: boolean;
+      results: { avatar: string };
+      message: string;
+    }>(`${this.apiUrl}user/upload_avatar`, formData, {
+      headers: this.getMultipartAuthHeaders(),
+    });
   }
 
-  removeAvatar(): Observable<{ success: boolean; results: { avatar: null }; message: string }> {
-    return this.http.delete<{ success: boolean; results: { avatar: null }; message: string }>(
-      `${this.apiUrl}user/remove_avatar`,
-      { headers: this.getAuthHeaders() }
-    );
+  removeAvatar(): Observable<{
+    success: boolean;
+    results: { avatar: null };
+    message: string;
+  }> {
+    return this.http.delete<{
+      success: boolean;
+      results: { avatar: null };
+      message: string;
+    }>(`${this.apiUrl}user/remove_avatar`, { headers: this.getAuthHeaders() });
   }
 
   sendVerificationEmail(emailData: any): Observable<any> {
@@ -71,12 +83,19 @@ export class UserService {
     );
   }
 
-  changeEmail(changeEmail: { change_email: string }): Observable<{ success: boolean; results: { email: string }; message: string }> {
-    return this.http.post<{ success: boolean; results: { email: string }; message: string }>(
-      `${this.apiUrl}user/change_email`,
-      changeEmail,
-      { headers: this.getAuthHeaders() }
-    );
+  changeEmail(changeEmail: {
+    change_email: string;
+  }): Observable<{
+    success: boolean;
+    results: { email: string };
+    message: string;
+  }> {
+    return this.http.post<{
+      success: boolean;
+      results: { email: string };
+      message: string;
+    }>(`${this.apiUrl}user/change_email`, changeEmail, {
+      headers: this.getAuthHeaders(),
+    });
   }
 }
-

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class BaseController extends Controller
 {
@@ -57,14 +58,9 @@ class BaseController extends Controller
                 return $s3->temporaryUrl($path, now()->addMinutes($minutes));
             }
         } catch (\Exception $e) {
-            // S3 is not available or configured, fall through to local file check
-        }
-        
-        $filename = basename($path);
-        $localPath = public_path("assets/books/{$filename}");
-        
-        if (file_exists($localPath)) {
-            return asset("assets/books/{$filename}");
+            // S3 is not available or configured
+            Log::error('S3 URL generation failed: ' . $e->getMessage());
+            return null;
         }
         
         return null;
