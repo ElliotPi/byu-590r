@@ -10,7 +10,7 @@ project_name = "byu-590r"
 environment = "production"  # Can be 'development', 'local', or 'production'
 
 # EC2 Configuration
-instance_type = "t2.micro"
+instance_type = "t3.micro"
 ami_id        = "ami-04f34746e5e1ec0fe"
 
 # Security Group Configuration

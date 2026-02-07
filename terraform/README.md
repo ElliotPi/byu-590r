@@ -10,7 +10,7 @@ This Terraform configuration replicates the functionality of `devops/bash/setup-
   - HTTPS (port 443)
   - Backend API (port 4444)
 
-- **EC2 Instance**: `t2.micro` instance with:
+- **EC2 Instance**: `t3.micro` instance with:
   - Node.js 18
   - PHP 8.3 with required extensions
   - Composer
@@ -132,7 +132,7 @@ See `variables.tf` for all available variables. Key variables:
 - `aws_region`: AWS region (default: `us-west-1`)
 - `key_name`: EC2 key pair name (default: `byu-590r`)
 - `project_name`: Project name for resource naming (default: `byu-590r`)
-- `instance_type`: EC2 instance type (default: `t2.micro`)
+- `instance_type`: EC2 instance type (default: `t3.micro`)
 - `ami_id`: AMI ID for EC2 instance (default: `ami-04f34746e5e1ec0fe`)
 - `github_token`: (optional) GitHub PAT with repo Secrets write; used only when `manage_github_secrets` is true to update GitHub Actions secrets from Terraform outputs.
 - `github_repository`: (optional) Repository for GitHub Actions secrets, e.g. `owner/repo` (default: this repo).

@@ -101,7 +101,7 @@ output "summary" {
     📋 Next Steps - Update GitHub Actions Secrets:
     
       1. Go to your GitHub repository settings:
-         https://github.com/BYU-IS-590R-Christiansen/byu-590r-monorepo/settings/secrets/actions
+         https://github.com/ElliotPi/byu-590r/settings/secrets/actions
       
       2. Update the EC2_HOST secret with the new Elastic IP:
          Secret Name: EC2_HOST
