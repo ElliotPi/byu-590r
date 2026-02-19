@@ -49,17 +49,15 @@ test.describe("Deployment Verification", () => {
 		// Wait for the page to load
 		await page.waitForLoadState("networkidle");
 
-		// Check for "Login Here" text - it appears in both the title and button
-		// Use a more specific locator to avoid strict mode violation (multiple matches)
-		// Check for the card title specifically
+		// Check for the login card title text
 		const loginHereTitle = page
 			.locator("mat-card-title")
 			.getByText("Login Here", { exact: true });
 		await expect(loginHereTitle).toBeVisible({ timeout: 10000 });
 
-		// Also check for the button with "Login Here" text
-		const loginButton = page.getByRole("button", { name: "Login Here" });
-		await expect(loginButton).toBeVisible({ timeout: 10000 });
+		// Verify the primary submit action exists on the login form
+		const signInButton = page.getByRole("button", { name: "Sign In" });
+		await expect(signInButton).toBeVisible({ timeout: 10000 });
 
 		// Verify login form elements are present
 		const emailInput = page.getByLabel("Email");
