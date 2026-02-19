@@ -11,6 +11,8 @@ start:
 	cd backend && composer install
 	@echo "Starting Laravel backend with MySQL..."
 	cd backend && docker compose up -d
+	@echo "Fixing Laravel writable directory permissions..."
+	cd backend && docker compose exec -T --user root app sh -lc 'mkdir -p storage/logs storage/framework/{cache,sessions,views} bootstrap/cache && chmod -R 777 storage bootstrap/cache'
 	@echo "Waiting for database to be ready..."
 	@cd backend && mysql_ready=0 && for i in $$(seq 1 30); do \
 		if docker compose exec -T mysql mysqladmin ping -h localhost --silent 2>/dev/null; then \
