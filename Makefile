@@ -18,10 +18,18 @@ start:
 		fi; \
 		echo "Waiting for MySQL... ($$i/30)"; sleep 2; \
 	done && if [ $$mysql_ready -ne 1 ]; then echo "ERROR: MySQL did not become ready in time."; exit 1; fi
-	@echo "Ensuring database 'app_app' exists..."
-	@cd backend && docker compose exec -T mysql mysql -u root -prootpassword -e "CREATE DATABASE IF NOT EXISTS app_app;" 2>/dev/null || true
-	@cd backend && docker compose exec -T mysql mysql -u root -prootpassword -e "CREATE USER IF NOT EXISTS 'app_user'@'%' IDENTIFIED BY 'app_password';" 2>/dev/null || true
-	@cd backend && docker compose exec -T mysql mysql -u root -prootpassword -e "GRANT ALL PRIVILEGES ON app_app.* TO 'app_user'@'%'; FLUSH PRIVILEGES;" 2>/dev/null || true
+	@echo "Ensuring configured database and user exist..."
+	@cd backend && DB_DATABASE=$$(sed -n 's/^DB_DATABASE=//p' .env | tail -n1) && \
+		DB_DATABASE=$${DB_DATABASE:-app_app} && \
+		docker compose exec -T mysql mysql -u root -p"$${MYSQL_ROOT_PASSWORD:-rootpassword}" -e "CREATE DATABASE IF NOT EXISTS \`$$DB_DATABASE\`;" 2>/dev/null || true
+	@cd backend && DB_USERNAME=$$(sed -n 's/^DB_USERNAME=//p' .env | tail -n1) && \
+		DB_PASSWORD=$$(sed -n 's/^DB_PASSWORD=//p' .env | tail -n1) && \
+		DB_USERNAME=$${DB_USERNAME:-app_user} && DB_PASSWORD=$${DB_PASSWORD:-app_password} && \
+		docker compose exec -T mysql mysql -u root -p"$${MYSQL_ROOT_PASSWORD:-rootpassword}" -e "CREATE USER IF NOT EXISTS '$$DB_USERNAME'@'%' IDENTIFIED BY '$$DB_PASSWORD';" 2>/dev/null || true
+	@cd backend && DB_DATABASE=$$(sed -n 's/^DB_DATABASE=//p' .env | tail -n1) && \
+		DB_USERNAME=$$(sed -n 's/^DB_USERNAME=//p' .env | tail -n1) && \
+		DB_DATABASE=$${DB_DATABASE:-app_app} && DB_USERNAME=$${DB_USERNAME:-app_user} && \
+		docker compose exec -T mysql mysql -u root -p"$${MYSQL_ROOT_PASSWORD:-rootpassword}" -e "GRANT ALL PRIVILEGES ON \`$$DB_DATABASE\`.* TO '$$DB_USERNAME'@'%'; FLUSH PRIVILEGES;" 2>/dev/null || true
 	@echo "Using Laravel backend dependencies from local install (backend/vendor)..."
 	@echo "Clearing Laravel caches and regenerating autoloader..."
 	cd backend && docker compose exec -T app composer dump-autoload -o || true
@@ -63,7 +71,7 @@ start-dev:
 	cd web-app && npm install
 	@echo "Frontend will be available at: http://localhost:4200"
 	@echo "Backend API: http://localhost:8000"
-	@echo "Database: localhost:3306"
+	@echo "Database: localhost:$${MYSQL_HOST_PORT:-3307}"
 	@echo ""
 	@echo "Starting Angular dev server in background..."
 	cd web-app && npm start &
@@ -79,7 +87,7 @@ start-prod:
 	@echo "All services started!"
 	@echo "Frontend: http://localhost:3000"
 	@echo "Backend API: http://localhost:8000"
-	@echo "Database: localhost:3306"
+	@echo "Database: localhost:$${MYSQL_HOST_PORT:-3307}"
 
 # Run database migrations and seed; used by start
 migrate:
@@ -92,8 +100,8 @@ stop:
 	docker stop byu-590r-frontend || true
 	docker rm byu-590r-frontend || true
 	@echo "Stopping Angular dev server..."
-	pkill -f "ng serve" || true
-	pkill -f "npm start" || true
+	pkill -f "[n]g serve" || true
+	pkill -f "[n]pm start" || true
 	@echo "All services stopped!"
 
 # Clean up everything

@@ -7,7 +7,7 @@ use App\Mail\PasswordReset;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
@@ -40,24 +40,32 @@ class RegisterController extends BaseController
 
     public function login(Request $request)
     {
-        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-            /** @var \App\Models\User $user **/
-            $user = Auth::user();
-            $user->tokens()->delete();
-            $user->remember_token = null;
-            $user->save();
-            $token = $user->createToken('MyApp');
-            $success['token'] = $token->plainTextToken;
-            $success['name'] = $user->name;
-            $success['avatar'] = null;
-            if (isset($user->avatar)) {
-                $success['avatar'] = $this->getS3Url($user->avatar);
-            }
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|string|min:8',
+        ]);
 
-            return $this->sendResponse($success, 'User login successfully.');
-        } else {
-            return $this->sendError('Unauthorised.', ['error' => 'Unauthorised']);
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors(), 422);
         }
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return $this->sendError('Unauthorised.', ['error' => 'Unauthorised'], 401);
+        }
+
+        $user->tokens()->delete();
+        $user->remember_token = null;
+        $user->save();
+        $token = $user->createToken('MyApp');
+        $success['token'] = $token->plainTextToken;
+        $success['name'] = $user->name;
+        $success['avatar'] = null;
+        if (isset($user->avatar)) {
+            $success['avatar'] = $this->getS3Url($user->avatar);
+        }
+
+        return $this->sendResponse($success, 'User login successfully.');
     }
 
     public function logout(Request $request)
@@ -162,4 +170,3 @@ class RegisterController extends BaseController
         return Redirect::to(env('FRONTEND_URL', 'http://localhost:4200') . '/home');
     }
 }
-
