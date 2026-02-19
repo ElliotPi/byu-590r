@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, ViewChild, inject, signal } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -36,7 +36,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent {
+export class LoginComponent implements OnDestroy {
   private authService = inject(AuthService);
   private authStore = inject(AuthStore);
   private router = inject(Router);
@@ -54,6 +54,9 @@ export class LoginComponent {
   registerDialog = signal(false);
   submitForgotPasswordLoading = signal(false);
   registerFormIsLoading = signal(false);
+  isMusicPlaying = signal(false);
+
+  @ViewChild('loginMusic') loginMusic?: ElementRef<HTMLAudioElement>;
 
   constructor() {
     this.loginForm = this.fb.group({
@@ -174,5 +177,55 @@ export class LoginComponent {
         this.registerFormIsLoading.set(false);
       },
     });
+  }
+
+  async toggleMusic(): Promise<void> {
+    const audioElement = this.loginMusic?.nativeElement;
+    if (!audioElement) {
+      return;
+    }
+
+    if (this.isMusicPlaying()) {
+      audioElement.pause();
+      this.isMusicPlaying.set(false);
+      return;
+    }
+
+    try {
+      if (audioElement.readyState === 0) {
+        audioElement.load();
+      }
+      audioElement.muted = false;
+      audioElement.volume = 1;
+      await audioElement.play();
+    } catch (error) {
+      this.snackBar.open(
+        'Unable to play this audio file in your browser.',
+        'Close',
+        {
+          duration: 3500,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+        }
+      );
+      console.error('Unable to start login music', error);
+    }
+  }
+
+  handleMusicError(): void {
+    this.snackBar.open('Audio file failed to load or decode.', 'Close', {
+      duration: 4000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+    });
+  }
+
+  ngOnDestroy(): void {
+    const audioElement = this.loginMusic?.nativeElement;
+    if (!audioElement) {
+      return;
+    }
+    audioElement.pause();
+    audioElement.currentTime = 0;
   }
 }

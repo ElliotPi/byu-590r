@@ -3,56 +3,140 @@
 @use '../../../assets/styles/fonts' as fonts;
 
 .login-page-content {
+  position: relative;
+  overflow: hidden;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
+  padding: spacing.$spacing-medium-large spacing.$spacing-large;
   height: 100vh;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.18)),
+    url('/assets/images/login-bg.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(6, 12, 24, 0.62) 0%,
+      rgba(6, 12, 24, 0.48) 28%,
+      rgba(6, 12, 24, 0.2) 50%,
+      rgba(6, 12, 24, 0) 72%
+    );
+    pointer-events: none;
+  }
+}
+
+.bg-orb {
+  display: none;
+}
+
+.orb-one {
+  width: 260px;
+  height: 260px;
+  top: -80px;
+  left: -80px;
+  background: rgba(76, 175, 80, 0.24);
+}
+
+.orb-two {
+  width: 320px;
+  height: 320px;
+  right: -120px;
+  bottom: -120px;
+  background: rgba(33, 150, 243, 0.22);
 }
 
 .login-box {
-  width: 100vw;
-  height: 100vh;
+  position: relative;
+  z-index: 1;
+  width: min(460px, 100%);
+  max-height: 94vh;
+  overflow: auto;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: colors.$colors-charcoal;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
-  row-gap: spacing.$spacing-medium-large;
-  padding: spacing.$spacing-medium-large;
-  border-radius: spacing.$border-radius-medium;
+  justify-content: flex-start;
+  align-items: stretch;
+  background: linear-gradient(180deg, rgba(16, 30, 54, 0.58) 0%, rgba(9, 18, 34, 0.62) 100%);
+  box-shadow:
+    0 20px 44px rgba(2, 8, 18, 0.52),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  padding: spacing.$spacing-medium-large spacing.$spacing-medium-large;
+  border-radius: spacing.$border-radius-medium + 8px;
+  border: 1px solid rgba(162, 196, 255, 0.28);
+  backdrop-filter: blur(7px);
 }
 
-@media screen and (min-width: 769px) {
-  .login-box {
-    width: 750px;
-    height: 50vh;
-  }
+.login-header {
+  padding-bottom: spacing.$spacing-small;
 }
 
-@media screen and (min-width: 1200px) {
-  .login-box {
-    width: 500px;
-    height: unset;
-  }
+.login-body {
+  width: 100%;
+  padding-top: spacing.$spacing-small;
+}
+
+.login-form {
+  width: 100%;
 }
 
 .input-container {
   width: 100%;
-  max-width: 400px;
+  max-width: unset;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   row-gap: spacing.$spacing-medium;
 }
 
 .button-group {
   width: 100%;
   display: flex;
-  column-gap: spacing.$spacing-extra-small;
+  column-gap: spacing.$spacing-small;
+  row-gap: spacing.$spacing-small;
   padding: spacing.$spacing-medium 0;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.login-page-content audio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.primary-action {
+  min-width: 140px;
+  min-height: 42px;
+  border-radius: 999px;
+}
+
+.music-toggle {
+  border-radius: 999px;
+  border-color: rgba(190, 213, 255, 0.44);
+  color: colors.$colors-white;
+  background: rgba(8, 20, 40, 0.34);
+}
+
+.music-toggle-floating {
+  position: absolute;
+  top: spacing.$spacing-medium;
+  right: spacing.$spacing-medium;
+  z-index: 2;
+}
+
+.secondary-action {
+  border-radius: 999px;
+  padding-inline: spacing.$spacing-small;
+  opacity: 0.95;
 }
 
 .alert {
@@ -88,40 +172,70 @@
 }
 
 .modal-content {
-  background-color: colors.$colors-charcoal;
+  background: linear-gradient(180deg, rgba(33, 41, 54, 1) 0%, rgba(23, 30, 43, 1) 100%);
   color: colors.$colors-white;
   border-radius: spacing.$border-radius-medium;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.modal-header {
+  justify-content: space-between;
+  align-items: center;
 }
 
 .full-width {
   width: 100%;
 }
 
+small {
+  opacity: 0.75;
+}
+
 ::ng-deep {
   .mat-mdc-card {
-    background-color: colors.$colors-charcoal !important;
+    background-color: transparent !important;
     color: colors.$colors-white !important;
   }
   
   .mat-mdc-card-title,
   .mat-mdc-card-subtitle {
     color: colors.$colors-white !important;
+  }
+
+  .mat-mdc-card-title {
     @include fonts.fonts-h3;
+    margin-bottom: spacing.$spacing-extra-small;
+    letter-spacing: 0.3px;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
+  }
+
+  .mat-mdc-card-subtitle {
+    @include fonts.fonts-caption;
+    opacity: 0.9;
+    color: rgba(235, 243, 255, 0.94) !important;
   }
   
   .mat-mdc-form-field {
     .mat-mdc-text-field-wrapper {
-      background-color: colors.$colors-dark-grey;
+      background-color: rgba(9, 18, 34, 0.42);
+      border-radius: spacing.$border-radius-small;
     }
     
     .mat-mdc-form-field-label {
       color: colors.$colors-white !important;
       @include fonts.fonts-body;
+      opacity: 0.9;
     }
     
     .mat-mdc-input-element {
       color: colors.$colors-white !important;
       @include fonts.fonts-body;
+    }
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: rgba(190, 213, 255, 0.38) !important;
     }
     
     .mat-mdc-form-field-error {
@@ -129,9 +243,31 @@
       @include fonts.fonts-caption;
     }
   }
+
+  .mdc-button {
+    letter-spacing: 0.3px;
+  }
   
   .mat-mdc-snack-bar-container {
     background-color: colors.$colors-charcoal !important;
     color: colors.$colors-white !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .login-page-content {
+    justify-content: center;
+    padding: spacing.$spacing-medium;
+  }
+
+  .music-toggle-floating {
+    top: spacing.$spacing-small;
+    right: spacing.$spacing-small;
+  }
+
+  .login-box {
+    width: min(460px, 100%);
+    border-radius: spacing.$border-radius-medium;
+    padding: spacing.$spacing-medium-large spacing.$spacing-medium;
   }
 }
