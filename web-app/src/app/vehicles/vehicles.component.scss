@@ -1,0 +1,140 @@
+.vehicles-page {
+  padding: 32px;
+}
+
+.vehicles-header {
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.vehicles-header h2 {
+  margin: 0 0 8px;
+  font-size: 32px;
+}
+
+.subtitle {
+  margin: 0;
+  max-width: 720px;
+  line-height: 1.6;
+  opacity: 0.78;
+}
+
+.table-shell {
+  overflow: hidden;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+}
+
+.vehicles-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.vehicles-table th,
+.vehicles-table td {
+  padding: 20px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.vehicles-table th {
+  background: #0f355b;
+  color: #ffffff;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.cover-cell {
+  width: 240px;
+}
+
+.vehicle-image {
+  width: 180px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 14px;
+  display: block;
+  background: #e5ecf3;
+}
+
+.fallback-cover {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #456789;
+}
+
+.fallback-cover mat-icon {
+  width: 48px;
+  height: 48px;
+  font-size: 48px;
+}
+
+.vehicle-name {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.vehicle-meta {
+  color: #5b6575;
+  font-size: 14px;
+}
+
+.description-cell {
+  line-height: 1.6;
+  color: #243244;
+}
+
+.state-card {
+  padding: 24px;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+@media (max-width: 900px) {
+  .vehicles-page {
+    padding: 16px;
+  }
+
+  .vehicles-table,
+  .vehicles-table thead,
+  .vehicles-table tbody,
+  .vehicles-table th,
+  .vehicles-table td,
+  .vehicles-table tr {
+    display: block;
+  }
+
+  .vehicles-table thead {
+    display: none;
+  }
+
+  .vehicles-table tr {
+    padding: 16px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  }
+
+  .vehicles-table td {
+    padding: 10px 0;
+    border-bottom: 0;
+  }
+
+  .cover-cell {
+    width: auto;
+  }
+
+  .vehicle-image {
+    width: 100%;
+    max-width: 320px;
+    height: 190px;
+  }
+}

@@ -3,10 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Mail\ForgotPassword;
-use App\Mail\PasswordReset;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
@@ -125,6 +123,7 @@ class RegisterController extends BaseController
         if (!$user) {
             return $this->sendError('Token Expired or Incorrect.', ['error' => 'Token Expired or Incorrect']);
         }
+
         $user = User::find($user->id);
         $newPassword = $request['setPassword'];
         if (!$request['setPassword']) {
@@ -138,7 +137,7 @@ class RegisterController extends BaseController
         if ($request['setPassword']) {
             return $this->sendResponse([], 'Password Reset Successfully!');
         }
-        Mail::to($user->email)->send(new PasswordReset($newPassword));
+        Mail::to($user->email)->send(new \App\Mail\PasswordReset($newPassword));
 
         return 'Password Reset Complete! Email Sent with a Temp New Password!';
     }

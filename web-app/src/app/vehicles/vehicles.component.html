@@ -1,0 +1,58 @@
+<section class="vehicles-page">
+  <div class="vehicles-header">
+    <div>
+      <p class="eyebrow">Garage</p>
+      <h2>Your Vehicles</h2>
+      <p class="subtitle">A display-only list of your current tracked vehicles and their saved primary images.</p>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="state-card">Loading vehicles...</div>
+  } @else {
+    <div class="table-shell">
+      <table class="vehicles-table">
+        <thead>
+          <tr>
+            <th>Vehicle Cover</th>
+            <th>Vehicle Name</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (vehicle of vehicles(); track vehicle.id) {
+            <tr>
+              <td class="cover-cell">
+                @if (vehicle.vehicle_picture) {
+                  <img
+                    [src]="vehicle.vehicle_picture"
+                    [alt]="vehicle.name"
+                    class="vehicle-image" />
+                } @else {
+                  <div class="vehicle-image fallback-cover">
+                    <mat-icon>directions_car</mat-icon>
+                  </div>
+                }
+              </td>
+              <td class="name-cell">
+                <div class="vehicle-name">{{ vehicle.name }}</div>
+                <div class="vehicle-meta">
+                  {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}
+                </div>
+              </td>
+              <td class="description-cell">
+                {{ vehicle.description }}
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="3">
+                <div class="state-card">No vehicles found.</div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

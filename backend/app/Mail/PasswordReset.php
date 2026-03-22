@@ -23,8 +23,11 @@ class PasswordReset extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address('webmaster@localhost.com', 'Webmaster'),
-            subject: 'Temp Password Reset Complete!',
+            from: new Address(
+                env('MAIL_FROM_ADDRESS', 'noreply@wrenchlog.local'),
+                env('MAIL_FROM_NAME', config('app.name', 'WrenchLog'))
+            ),
+            subject: 'Your WrenchLog password has been reset',
         );
     }
 
@@ -33,9 +36,9 @@ class PasswordReset extends Mailable
         return new Content(
             view: 'mail.password_reset',
             with: [
+                'appName' => config('app.name', 'WrenchLog'),
                 'newPassword' => $this->newPassword
             ]
         );
     }
 }
-

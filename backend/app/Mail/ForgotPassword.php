@@ -24,8 +24,11 @@ class ForgotPassword extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address('webmaster@localhost.com', 'Webmaster'),
-            subject: 'Forgot Password',
+            from: new Address(
+                env('MAIL_FROM_ADDRESS', 'noreply@wrenchlog.local'),
+                env('MAIL_FROM_NAME', config('app.name', 'WrenchLog'))
+            ),
+            subject: 'Reset your WrenchLog password',
         );
     }
 
@@ -38,10 +41,10 @@ class ForgotPassword extends Mailable
         return new Content(
             view: 'mail.forgot_password',
             with: [
+                'appName' => config('app.name', 'WrenchLog'),
                 'base_url' => $base_url,
                 'user' => $this->user
             ]
         );
     }
 }
-

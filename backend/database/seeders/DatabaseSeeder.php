@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             AuthorPhonesSeeder::class,
             AuthorBooksSeeder::class,
             PageSeeder::class,
+            VehiclesSeeder::class,
         ]);
     }
 }

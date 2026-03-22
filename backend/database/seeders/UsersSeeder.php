@@ -18,18 +18,28 @@ class UsersSeeder extends Seeder
     {
        
         $userData = [
-            'name' => 'Test User',
-            'email' => 'testuser@test.com',
+            [
+                'name' => 'Test User',
+                'email' => 'testuser@test.com',
+                'email_verified_at' => Carbon::now(),
+                'avatar' => null,
+                'password' => bcrypt('password12345'),
+            ],
+            [
+            'name' => 'Elliot Pi',
+            'email' => 'elliotpi@test.com',
             'email_verified_at' => Carbon::now(),
             'avatar' => null,
-            'password' => bcrypt('password12345'),
+            'password' => bcrypt('passwordelliotpi'),
+            ],
         ];
         
-        User::updateOrCreate(
-            ['email' => 'testuser@test.com'],
-            $userData
-        );
-        
+        foreach ($userData as $data) {
+            User::updateOrCreate(
+                ['email' => $data['email']], 
+                $data
+            );
+        }
     }
 }
 

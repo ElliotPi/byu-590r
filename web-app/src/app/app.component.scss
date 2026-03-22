@@ -124,18 +124,23 @@
 }
 
 .avatar-preview {
-  width: 100%;
-  max-width: 434px;
+  width: 200px;
+  height: 200px;
   margin: 0 auto spacing.$spacing-medium;
   display: flex;
   justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background-color: colors.$colors-light-grey;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
 }
 
 .profile-image {
   width: 100%;
-  max-width: 434px;
-  height: auto;
-  border-radius: spacing.$border-radius-small;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .avatar-icon-large {

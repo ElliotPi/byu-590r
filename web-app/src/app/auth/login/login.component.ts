@@ -69,13 +69,14 @@ export class LoginComponent implements OnDestroy {
 
     this.registerForm = this.fb.group(
       {
-        name: ['', [Validators.required, Validators.minLength(3)]],
+        firstName: ['', [Validators.required, Validators.minLength(2)]],
+        lastName: ['', [Validators.required, Validators.minLength(2)]],
         email: [
           '',
           [Validators.required, Validators.minLength(3), Validators.email],
         ],
         password: ['', [Validators.required, Validators.minLength(8)]],
-        c_password: ['', [Validators.required]],
+        confirmPassword: ['', [Validators.required]],
       },
       { validators: this.passwordMatchValidator }
     );
@@ -90,9 +91,13 @@ export class LoginComponent implements OnDestroy {
 
   passwordMatchValidator(form: FormGroup) {
     const password = form.get('password');
-    const cPassword = form.get('c_password');
-    if (password && cPassword && password.value !== cPassword.value) {
-      cPassword.setErrors({ passwordMismatch: true });
+    const confirmPassword = form.get('confirmPassword');
+    if (
+      password &&
+      confirmPassword &&
+      password.value !== confirmPassword.value
+    ) {
+      confirmPassword.setErrors({ passwordMismatch: true });
       return { passwordMismatch: true };
     }
     return null;
@@ -156,8 +161,21 @@ export class LoginComponent implements OnDestroy {
       return;
     }
 
+    const firstName = this.registerForm.get('firstName')?.value?.trim() || '';
+    const lastName = this.registerForm.get('lastName')?.value?.trim() || '';
+    const email = this.registerForm.get('email')?.value?.trim() || '';
+    const password = this.registerForm.get('password')?.value || '';
+    const confirmPassword =
+      this.registerForm.get('confirmPassword')?.value || '';
+    const payload = {
+      name: `${firstName} ${lastName}`.trim(),
+      email,
+      password,
+      c_password: confirmPassword,
+    };
+
     this.registerFormIsLoading.set(true);
-    this.authService.register(this.registerForm.value).subscribe({
+    this.authService.register(payload).subscribe({
       next: () => {
         this.snackBar.open('Success! Registration complete.', 'Close', {
           duration: 5000,
