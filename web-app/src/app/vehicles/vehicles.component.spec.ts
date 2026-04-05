@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { VehiclesComponent } from './vehicles.component';
 import { VehiclesStore } from '../core/stores/vehicles.store';
 import { Vehicle } from '../core/services/vehicles.service';
@@ -44,12 +45,23 @@ describe('VehiclesComponent', () => {
     vehicleRows: signal<Vehicle[]>(mockVehicles),
     isLoading: signal(false),
     loadVehicles: jasmine.createSpy('loadVehicles'),
+    createVehicle: jasmine.createSpy('createVehicle'),
+    updateVehicle: jasmine.createSpy('updateVehicle'),
+    deleteVehicle: jasmine.createSpy('deleteVehicle'),
+    generateVehicleDescription: jasmine.createSpy('generateVehicleDescription'),
+  };
+
+  const snackBarMock = {
+    open: jasmine.createSpy('open'),
   };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [VehiclesComponent],
-      providers: [{ provide: VehiclesStore, useValue: storeMock }],
+      providers: [
+        { provide: VehiclesStore, useValue: storeMock },
+        { provide: MatSnackBar, useValue: snackBarMock },
+      ],
     }).compileComponents();
   });
 

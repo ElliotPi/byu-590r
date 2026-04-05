@@ -3,8 +3,12 @@
     <div>
       <p class="eyebrow">Garage</p>
       <h2>Your Vehicles</h2>
-      <p class="subtitle">A display-only list of your current tracked vehicles and their saved primary images.</p>
     </div>
+
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Create Vehicle
+    </button>
   </div>
 
   @if (isLoading()) {
@@ -17,6 +21,7 @@
             <th>Vehicle Cover</th>
             <th>Vehicle Name</th>
             <th>Description</th>
+            <th class="actions-column">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -39,14 +44,33 @@
                 <div class="vehicle-meta">
                   {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}
                 </div>
+                @if (vehicle.nickname) {
+                  <div class="vehicle-secondary">Nickname: {{ vehicle.nickname }}</div>
+                }
               </td>
               <td class="description-cell">
                 {{ vehicle.description }}
               </td>
+              <td class="actions-cell">
+                <button
+                  mat-icon-button
+                  color="primary"
+                  (click)="openEditDialog(vehicle)"
+                  aria-label="Edit vehicle">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  color="warn"
+                  (click)="openDeleteDialog(vehicle)"
+                  aria-label="Delete vehicle">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="3">
+              <td colspan="4">
                 <div class="state-card">No vehicles found.</div>
               </td>
             </tr>
@@ -56,3 +80,378 @@
     </div>
   }
 </section>
+
+@if (createVehicleDialog()) {
+  <div class="modal" (click)="closeCreateDialog()">
+    <div class="modal-dialog modal-lg" (click)="$event.stopPropagation()">
+      <mat-card class="modal-content">
+        <mat-card-header class="modal-header">
+          <mat-card-title>Create Vehicle</mat-card-title>
+          <button mat-icon-button class="close-button" (click)="closeCreateDialog()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="createVehicleForm" class="vehicle-form">
+            <div class="form-grid">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Vehicle Name</mat-label>
+                <input matInput type="text" formControlName="name" />
+                @if (getFieldError(createVehicleForm, 'name')) {
+                  <mat-error>{{ getFieldError(createVehicleForm, 'name') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Nickname</mat-label>
+                <input matInput type="text" formControlName="nickname" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Year</mat-label>
+                <input matInput type="number" formControlName="year" />
+                @if (getFieldError(createVehicleForm, 'year')) {
+                  <mat-error>{{ getFieldError(createVehicleForm, 'year') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Make</mat-label>
+                <input matInput type="text" formControlName="make" />
+                @if (getFieldError(createVehicleForm, 'make')) {
+                  <mat-error>{{ getFieldError(createVehicleForm, 'make') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Model</mat-label>
+                <input matInput type="text" formControlName="model" />
+                @if (getFieldError(createVehicleForm, 'model')) {
+                  <mat-error>{{ getFieldError(createVehicleForm, 'model') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Trim</mat-label>
+                <input matInput type="text" formControlName="trim" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Engine</mat-label>
+                <input matInput type="text" formControlName="engine" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>VIN</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  formControlName="vin"
+                  class="uppercase-input"
+                  (input)="onVinInput(createVehicleForm, $event)" />
+                @if (getFieldError(createVehicleForm, 'vin')) {
+                  <mat-error>{{ getFieldError(createVehicleForm, 'vin') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>License Plate</mat-label>
+                <input matInput type="text" formControlName="license_plate" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Purchase Date</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  formControlName="purchase_date"
+                  placeholder="MM/DD/YYYY" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>How do you use this vehicle?</mat-label>
+                <input matInput type="text" formControlName="use_case" />
+              </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput rows="4" formControlName="description"></textarea>
+              @if (getFieldError(createVehicleForm, 'description')) {
+                <mat-error>{{ getFieldError(createVehicleForm, 'description') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <div class="button-row">
+              <button
+                mat-stroked-button
+                color="primary"
+                type="button"
+                [disabled]="descriptionIsGenerating()"
+                (click)="generateCreateDescription()">
+                @if (descriptionIsGenerating()) {
+                  <mat-spinner diameter="18"></mat-spinner>
+                  <span>Generating...</span>
+                } @else {
+                  <ng-container>
+                    <mat-icon>auto_awesome</mat-icon>
+                    <span>Generate Description</span>
+                  </ng-container>
+                }
+              </button>
+            </div>
+
+            <div class="form-group">
+              <label class="file-input-label">Vehicle Cover Image*</label>
+              <input
+                type="file"
+                accept="image/*"
+                class="file-input"
+                (change)="onCreateVehicleFileChange($event)" />
+              @if (selectedCreateFile()) {
+                <div class="selected-file">Selected: {{ selectedCreateFile()?.name }}</div>
+              }
+              @if (getFieldError(createVehicleForm, 'file')) {
+                <div class="file-input-error">{{ getFieldError(createVehicleForm, 'file') }}</div>
+              }
+            </div>
+
+            @if (createVehicleErrorMessage()) {
+              <mat-card class="alert alert-danger">
+                {{ createVehicleErrorMessage() }}
+              </mat-card>
+            }
+          </form>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button (click)="closeCreateDialog()">Close</button>
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="!createVehicleForm.valid || !selectedCreateFile() || vehicleIsCreating()"
+            (click)="createVehicle()">
+            @if (vehicleIsCreating()) {
+              <mat-spinner diameter="20"></mat-spinner>
+              <span>Creating...</span>
+            } @else {
+              <span>Save Vehicle</span>
+            }
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+}
+
+@if (editVehicleDialog()) {
+  <div class="modal" (click)="closeEditDialog()">
+    <div class="modal-dialog modal-lg" (click)="$event.stopPropagation()">
+      <mat-card class="modal-content">
+        <mat-card-header class="modal-header">
+          <mat-card-title>Edit {{ editingVehicle()?.name }}</mat-card-title>
+          <button mat-icon-button class="close-button" (click)="closeEditDialog()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="editVehicleForm" class="vehicle-form">
+            <div class="form-grid">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Vehicle Name</mat-label>
+                <input matInput type="text" formControlName="name" />
+                @if (getFieldError(editVehicleForm, 'name')) {
+                  <mat-error>{{ getFieldError(editVehicleForm, 'name') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Nickname</mat-label>
+                <input matInput type="text" formControlName="nickname" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Year</mat-label>
+                <input matInput type="number" formControlName="year" />
+                @if (getFieldError(editVehicleForm, 'year')) {
+                  <mat-error>{{ getFieldError(editVehicleForm, 'year') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Make</mat-label>
+                <input matInput type="text" formControlName="make" />
+                @if (getFieldError(editVehicleForm, 'make')) {
+                  <mat-error>{{ getFieldError(editVehicleForm, 'make') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Model</mat-label>
+                <input matInput type="text" formControlName="model" />
+                @if (getFieldError(editVehicleForm, 'model')) {
+                  <mat-error>{{ getFieldError(editVehicleForm, 'model') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Trim</mat-label>
+                <input matInput type="text" formControlName="trim" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Engine</mat-label>
+                <input matInput type="text" formControlName="engine" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>VIN</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  formControlName="vin"
+                  class="uppercase-input"
+                  (input)="onVinInput(editVehicleForm, $event)" />
+                @if (getFieldError(editVehicleForm, 'vin')) {
+                  <mat-error>{{ getFieldError(editVehicleForm, 'vin') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>License Plate</mat-label>
+                <input matInput type="text" formControlName="license_plate" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Purchase Date</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  formControlName="purchase_date"
+                  placeholder="MM/DD/YYYY" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>How do you use this vehicle?</mat-label>
+                <input matInput type="text" formControlName="use_case" />
+              </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput rows="4" formControlName="description"></textarea>
+              @if (getFieldError(editVehicleForm, 'description')) {
+                <mat-error>{{ getFieldError(editVehicleForm, 'description') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <div class="button-row">
+              <button
+                mat-stroked-button
+                color="primary"
+                type="button"
+                [disabled]="descriptionIsGenerating()"
+                (click)="generateEditDescription()">
+                @if (descriptionIsGenerating()) {
+                  <mat-spinner diameter="18"></mat-spinner>
+                  <span>Generating...</span>
+                } @else {
+                  <ng-container>
+                    <mat-icon>auto_awesome</mat-icon>
+                    <span>Generate Description</span>
+                  </ng-container>
+                }
+              </button>
+            </div>
+
+            <div class="current-cover-section">
+              <div class="current-cover-label">Current Vehicle Cover</div>
+              @if (editPreviewUrl()) {
+                <img
+                  [src]="editPreviewUrl()!"
+                  [alt]="editingVehicle()?.name || 'Vehicle cover preview'"
+                  class="edit-cover-preview" />
+              } @else {
+                <div class="edit-cover-preview fallback-cover">
+                  <mat-icon>directions_car</mat-icon>
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label class="file-input-label">Replace Vehicle Cover Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                class="file-input"
+                (change)="onEditVehicleFileChange($event)" />
+              @if (selectedEditFile()) {
+                <div class="selected-file">Selected: {{ selectedEditFile()?.name }}</div>
+              }
+            </div>
+
+            @if (editVehicleErrorMessage()) {
+              <mat-card class="alert alert-danger">
+                {{ editVehicleErrorMessage() }}
+              </mat-card>
+            }
+          </form>
+        </mat-card-content>
+        <mat-card-actions class="dialog-actions">
+          <button mat-button (click)="closeEditDialog()">Close</button>
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="!editVehicleForm.valid || vehicleIsUpdating()"
+            (click)="updateVehicle()">
+            @if (vehicleIsUpdating()) {
+              <mat-spinner diameter="20"></mat-spinner>
+              <span>Updating...</span>
+            } @else {
+              <span>Save Changes</span>
+            }
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+}
+
+@if (deleteVehicleDialog()) {
+  <div class="modal" (click)="closeDeleteDialog()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <mat-card class="modal-content">
+        <mat-card-header class="modal-header">
+          <mat-card-title>Delete Vehicle</mat-card-title>
+          <button mat-icon-button class="close-button" (click)="closeDeleteDialog()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <p>
+            Are you sure you wish to permanently delete
+            <strong>{{ selectedDeleteVehicle()?.name }}</strong>?
+          </p>
+          <p class="delete-warning">
+            ALL the data related to this vehicle will be deleted.
+          </p>
+        </mat-card-content>
+        <mat-card-actions class="delete-actions">
+          <button mat-button (click)="closeDeleteDialog()">Cancel</button>
+          <button
+            mat-flat-button
+            color="warn"
+            class="delete-confirm-button"
+            [disabled]="vehicleIsDeleting()"
+            (click)="deleteVehicle()">
+            @if (vehicleIsDeleting()) {
+              <mat-spinner diameter="20"></mat-spinner>
+              <span>Deleting...</span>
+            } @else {
+              <span>Delete</span>
+            }
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+}

@@ -113,12 +113,13 @@ class VehiclesSeeder extends Seeder
             $imageData = $vehicleData['image'];
             unset($vehicleData['image']);
 
-            $vehicle = Vehicle::updateOrCreate(
+            $vehicle = Vehicle::withTrashed()->updateOrCreate(
                 ['vin' => $vehicleData['vin']],
                 [
                     ...$vehicleData,
                     'user_id' => $user->id,
                     'purchase_date' => Carbon::parse($vehicleData['purchase_date']),
+                    'deleted_at' => null,
                 ]
             );
 

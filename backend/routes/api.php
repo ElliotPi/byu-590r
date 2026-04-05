@@ -34,7 +34,12 @@ Route::middleware(\App\Http\Middleware\AuthenticateApi::class)->group(function (
     });
 
     Route::resource('books', BookController::class);
-    Route::resource('vehicles', VehicleController::class)->only(['index']);
+    Route::resource('vehicles', VehicleController::class)
+        ->parameters(['vehicles' => 'id'])
+        ->only(['index', 'store', 'update', 'destroy']);
+    Route::controller(VehicleController::class)->group(function () {
+        Route::post('vehicles/generate_description', 'generateDescription');
+    });
     Route::controller(BookController::class)->group(function () {
         Route::post('books/{id}/checkout', 'checkoutBook');
         Route::patch('books/{id}/return', 'returnBook');
