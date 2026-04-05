@@ -1,13 +1,73 @@
-<div class="home-container">
-  <h2>Here are your favorite books:</h2>
-  <mat-card>
-    <mat-card-content>
-      <mat-list>
-        @for (book of listOfBooks; track book) {
-          <mat-list-item>{{ book }}</mat-list-item>
-        }
-      </mat-list>
-    </mat-card-content>
-  </mat-card>
-</div>
+<section class="home-shell">
+  <div class="hero-card">
+    <div class="hero-copy">
+      <p class="eyebrow">WrenchLog Garage</p>
+      <h1>Keep every DIY repair, service interval, and vehicle photo in one clean system.</h1>
+      <p class="hero-text">
+        Welcome back, {{ userName() }}. This dashboard is built for owners who
+        would rather document real maintenance than dig through old receipts and
+        fuzzy memory.
+      </p>
 
+      <div class="hero-actions">
+        <button mat-raised-button color="primary" (click)="goToVehicles()">
+          <mat-icon>garage</mat-icon>
+          Open Vehicles
+        </button>
+        <button mat-stroked-button color="primary" routerLink="/vehicles">
+          <mat-icon>add_photo_alternate</mat-icon>
+          Add Cover Photos
+        </button>
+      </div>
+    </div>
+
+    <div class="hero-panel">
+      @for (metric of metrics; track metric.label) {
+        <div class="metric-card">
+          <div class="metric-value">{{ metric.value }}</div>
+          <div class="metric-label">{{ metric.label }}</div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <mat-card class="panel-card checklist-card">
+      <mat-card-header>
+        <mat-card-title>Garage Checklist</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="checklist-list">
+          @for (item of checklist; track item.label) {
+            <div class="checklist-item">
+              <div class="checkmark">
+                <mat-icon>done</mat-icon>
+              </div>
+              <div>
+                <div class="checklist-label">{{ item.label }}</div>
+                <div class="checklist-note">{{ item.note }}</div>
+              </div>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="shortcut-stack">
+      @for (shortcut of shortcuts; track shortcut.title) {
+        <mat-card class="panel-card shortcut-card">
+          <mat-card-content>
+            <div class="shortcut-icon">
+              <mat-icon>{{ shortcut.icon }}</mat-icon>
+            </div>
+            <div class="shortcut-title">{{ shortcut.title }}</div>
+            <div class="shortcut-description">{{ shortcut.description }}</div>
+            <button mat-button color="primary" [routerLink]="shortcut.route">
+              {{ shortcut.buttonLabel }}
+            </button>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  </div>
+</section>
