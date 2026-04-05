@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthStore } from '../core/stores/auth.store';
+import { VehiclesStore } from '../core/stores/vehicles.store';
 
 interface GarageChecklistItem {
   label: string;
@@ -37,17 +38,19 @@ interface GarageShortcut {
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   private authStore = inject(AuthStore);
   private router = inject(Router);
+  private vehiclesStore = inject(VehiclesStore);
 
   readonly userName = computed(() => this.authStore.userName() || 'Driver');
-
-  readonly metrics: GarageMetric[] = [
-    { label: 'Tracked Vehicles', value: '5' },
-    { label: 'Open Service Logs', value: '12' },
+  readonly vehicleCount = computed(() => this.vehiclesStore.vehicleRows().length);
+  readonly metrics = computed<GarageMetric[]>(() => [
+    { label: 'Tracked Vehicles', value: String(this.vehicleCount()) },
+    // TODO: Replace this placeholder once service record listing is implemented.
+    { label: 'Open Service Logs', value: 'Coming Soon' },
     { label: 'DIY Priority This Week', value: 'Oil + Inspection' },
-  ];
+  ]);
 
   readonly checklist: GarageChecklistItem[] = [
     {
@@ -87,6 +90,10 @@ export class HomeComponent {
       buttonLabel: 'Keep Logging',
     },
   ];
+
+  ngOnInit(): void {
+    this.vehiclesStore.loadVehicles();
+  }
 
   goToVehicles(): void {
     this.router.navigate(['/vehicles']);
