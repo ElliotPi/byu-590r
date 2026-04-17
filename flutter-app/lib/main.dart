@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:byu_590r_flutter_app/screens/register.dart';
+import 'package:byu_590r_flutter_app/app_theme.dart';
+import 'package:byu_590r_flutter_app/screens/welcome_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -11,13 +13,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'BYU 590R Flutter App',
+      title: 'BYU 590R Library',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const RegisterScreen(),
+      theme: buildAppTheme(),
+      home: const WelcomeScreen(),
     );
   }
 }
-
