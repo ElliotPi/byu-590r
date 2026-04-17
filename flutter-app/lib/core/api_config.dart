@@ -5,7 +5,7 @@ const String _kApiUrlOverride = String.fromEnvironment('API_BASE_URL');
 
 /// Production API (Terraform elastic IP + backend port). Used for `--release` when
 /// `API_BASE_URL` is not set.
-const String kProductionApiBaseUrl = 'http://52.52.126.202:4444/api/';
+const String kProductionApiBaseUrl = 'http://http://13.57.172.199:4444/api/';
 
 /// Debug/profile default when `API_BASE_URL` is unset.
 /// Android emulator → [10.0.2.2]. iOS simulator / desktop / web → [localhost].
