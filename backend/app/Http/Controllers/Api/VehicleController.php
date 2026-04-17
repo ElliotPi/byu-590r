@@ -176,7 +176,8 @@ class VehicleController extends BaseController
                     $image->delete();
                 }
 
-                $vehicle->delete();
+                $this->purgeServiceRecordsForVehicle($vehicle);
+                $vehicle->forceDelete();
             });
         } catch (\Throwable $e) {
             Log::error('Vehicle delete failed: ' . $e->getMessage(), ['exception' => $e]);
@@ -299,6 +300,41 @@ class VehicleController extends BaseController
             Storage::disk('s3')->delete($image->file_path);
         } catch (\Throwable $e) {
             Log::warning('Failed to delete vehicle image from storage: ' . $e->getMessage());
+        }
+    }
+
+    protected function purgeServiceRecordsForVehicle(Vehicle $vehicle): void
+    {
+        $records = $vehicle->serviceRecords()
+            ->withTrashed()
+            ->with(['images', 'note', 'parts'])
+            ->get();
+
+        foreach ($records as $record) {
+            $pathsToDelete = [];
+
+            if (!empty($record->receipt_image)) {
+                $pathsToDelete[$record->receipt_image] = true;
+            }
+
+            foreach ($record->images as $image) {
+                if (!empty($image->file_path)) {
+                    $pathsToDelete[$image->file_path] = true;
+                }
+            }
+
+            foreach (array_keys($pathsToDelete) as $path) {
+                try {
+                    Storage::disk('s3')->delete($path);
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to delete service image from storage: ' . $e->getMessage());
+                }
+            }
+
+            $record->parts()->detach();
+            $record->note()?->delete();
+            $record->images()->delete();
+            $record->forceDelete();
         }
     }
 }

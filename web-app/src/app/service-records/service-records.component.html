@@ -1,0 +1,572 @@
+<section class="service-records-page">
+  <div class="records-header">
+    <div>
+      <p class="eyebrow">Maintenance</p>
+      <h2>Service Records</h2>
+      <p class="subtitle">
+        Track each service visit, parts used, and receipts in one place.
+      </p>
+    </div>
+    <button mat-raised-button color="primary" matTooltip="Add a new maintenance entry" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Add Service Record
+    </button>
+  </div>
+
+  <div class="summary-grid">
+    @for (card of summaryCards(); track card.label) {
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-title">
+            <mat-icon>{{ card.icon }}</mat-icon>
+            <span>{{ card.label }}</span>
+          </div>
+          <div class="summary-value">{{ card.value }}</div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+
+  @if (filteredVehicle()) {
+    <div class="filter-banner">
+      <div>
+        Showing service logs for:
+        <strong>{{ filteredVehicle()?.name }}</strong>
+      </div>
+      <button mat-stroked-button color="primary" type="button" (click)="clearVehicleFilter()">
+        Show All Vehicles
+      </button>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    <div class="state-card">Loading service records...</div>
+  } @else {
+    <div class="table-shell">
+      <table class="records-table">
+        <thead>
+          <tr>
+            <th>Receipt</th>
+            <th>Service</th>
+            <th>Vehicle</th>
+            <th>Parts Used</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (record of filteredRecords(); track record.id) {
+            <tr>
+              <td class="receipt-cell">
+                @if (getPrimaryReceiptUrl(record)) {
+                  <img
+                    [src]="getPrimaryReceiptUrl(record)"
+                    [alt]="record.service_type?.name"
+                    class="receipt-image" />
+                } @else {
+                  <div class="receipt-image fallback-cover">
+                    <mat-icon>receipt_long</mat-icon>
+                  </div>
+                }
+                <div class="record-meta">
+                  Receipts: {{ getOrderedReceiptImages(record).length }}
+                </div>
+                <div class="record-meta">
+                  Service Photos: {{ getOrderedServiceImages(record).length }}
+                </div>
+              </td>
+              <td>
+                <div class="record-title">{{ record.service_type?.name }}</div>
+                <div class="record-meta">
+                  {{ record.performed_at | date: 'mediumDate' }} ·
+                  {{ record.odometer_miles }} mi
+                </div>
+              </td>
+              <td>
+                <div class="record-title">{{ record.vehicle?.name }}</div>
+                <div class="record-meta">
+                  {{ record.vehicle?.year }} {{ record.vehicle?.make }} {{ record.vehicle?.model }}
+                </div>
+              </td>
+              <td>
+                <div class="parts-list">
+                  @if ((record.parts || []).length > 0) {
+                    <mat-chip-set>
+                      @for (part of record.parts || []; track part.id) {
+                        <mat-chip>{{ part.name }}</mat-chip>
+                      }
+                    </mat-chip-set>
+                  } @else {
+                    <span class="muted">No parts selected</span>
+                  }
+                </div>
+              </td>
+              <td class="actions-cell">
+                <button mat-icon-button color="primary" matTooltip="Edit record" (click)="openEditDialog(record)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" matTooltip="Delete record" (click)="openDeleteDialog(record)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5">
+                <div class="state-card">
+                  @if (filteredVehicle()) {
+                    No service records found for {{ filteredVehicle()?.name }}.
+                  } @else {
+                    No service records found.
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+@if (createDialog()) {
+  <div class="modal" (click)="closeCreateDialog()">
+    <div class="modal-dialog modal-lg" (click)="$event.stopPropagation()">
+      <mat-card class="modal-content">
+        <mat-card-header class="modal-header">
+          <mat-card-title>Add Service Record</mat-card-title>
+          <button mat-icon-button class="close-button" (click)="closeCreateDialog()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="createForm" class="record-form">
+            <div class="form-grid">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Vehicle</mat-label>
+                <mat-select formControlName="vehicle_id">
+                  @for (vehicle of vehicles(); track vehicle.id) {
+                    <mat-option [value]="vehicle.id">{{ vehicle.name }}</mat-option>
+                  }
+                </mat-select>
+                @if (getFieldError(createForm, 'vehicle_id')) {
+                  <mat-error>{{ getFieldError(createForm, 'vehicle_id') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Service Type</mat-label>
+                <mat-select formControlName="service_type_id">
+                  @for (type of serviceTypes(); track type.id) {
+                    <mat-option [value]="type.id">{{ type.name }}</mat-option>
+                  }
+                </mat-select>
+                @if (getFieldError(createForm, 'service_type_id')) {
+                  <mat-error>{{ getFieldError(createForm, 'service_type_id') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Performed Date</mat-label>
+                <input matInput type="date" formControlName="performed_at" />
+                @if (getFieldError(createForm, 'performed_at')) {
+                  <mat-error>{{ getFieldError(createForm, 'performed_at') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Odometer Miles</mat-label>
+                <input matInput type="number" formControlName="odometer_miles" />
+                @if (getFieldError(createForm, 'odometer_miles')) {
+                  <mat-error>{{ getFieldError(createForm, 'odometer_miles') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Shop Name</mat-label>
+                <input matInput type="text" formControlName="shop_name" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>DIY?</mat-label>
+                <mat-select formControlName="is_diy">
+                  <mat-option [value]="true">DIY</mat-option>
+                  <mat-option [value]="false">Shop</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Labor Cost</mat-label>
+                <input matInput type="number" formControlName="labor_cost" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Parts Cost</mat-label>
+                <input matInput type="number" formControlName="parts_cost" />
+              </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Quick Summary Notes</mat-label>
+              <textarea matInput rows="3" formControlName="notes"></textarea>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Detailed Note</mat-label>
+              <textarea matInput rows="3" formControlName="note"></textarea>
+              @if (getFieldError(createForm, 'note')) {
+                <mat-error>{{ getFieldError(createForm, 'note') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <div class="parts-section">
+              <p class="section-title">Parts Used</p>
+              <div class="parts-grid">
+                @for (part of parts(); track part.id) {
+                  <div class="part-row">
+                    <mat-checkbox
+                      [checked]="selectedPartIds().includes(part.id)"
+                      (change)="togglePart(part, $event.checked, false)">
+                      {{ part.name }}
+                    </mat-checkbox>
+                    <input
+                      type="number"
+                      min="1"
+                      class="part-qty"
+                      [value]="partQuantities()[part.id] || 1"
+                      (input)="updatePartQuantity(part.id, $any($event.target).value, false)" />
+                  </div>
+                }
+              </div>
+            @if (showCreatePartsError()) {
+              <div class="parts-input-error">Select at least one part used.</div>
+            }
+            </div>
+            <mat-divider></mat-divider>
+
+            <div class="form-group">
+              <label class="file-input-label">Receipt Images* (multiple allowed)</label>
+              <input
+                type="file"
+                accept="image/*"
+                class="file-input"
+                multiple
+                (change)="onCreateReceiptFilesChange($event)" />
+              @if (selectedCreateReceiptFiles().length > 0) {
+                <div class="selected-file">
+                  Selected {{ selectedCreateReceiptFiles().length }} receipt image(s)
+                </div>
+              }
+              @if (getFieldError(createForm, 'receipt_files')) {
+                <div class="file-input-error">{{ getFieldError(createForm, 'receipt_files') }}</div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label class="file-input-label">Service Images (multiple allowed)</label>
+              <input
+                type="file"
+                accept="image/*"
+                class="file-input"
+                multiple
+                (change)="onCreateServiceFilesChange($event)" />
+              @if (selectedCreateServiceFiles().length > 0) {
+                <div class="selected-file">
+                  Selected {{ selectedCreateServiceFiles().length }} service image(s)
+                </div>
+              }
+            </div>
+
+            @if (createErrorMessage()) {
+              <mat-card class="alert alert-danger">{{ createErrorMessage() }}</mat-card>
+            }
+
+            <div class="modal-footer">
+              <button mat-button type="button" (click)="closeCreateDialog()">Cancel</button>
+              <button
+                mat-raised-button
+                color="primary"
+                type="button"
+                (click)="createRecord()"
+                [disabled]="!canSubmitCreate()">
+                @if (recordIsCreating()) {
+                  <mat-spinner diameter="18"></mat-spinner>
+                  <span>Saving...</span>
+                } @else {
+                  <span>Create Record</span>
+                }
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+}
+
+@if (editDialog()) {
+  <div class="modal" (click)="closeEditDialog()">
+    <div class="modal-dialog modal-lg" (click)="$event.stopPropagation()">
+      <mat-card class="modal-content">
+        <mat-card-header class="modal-header">
+          <mat-card-title>Edit Service Record</mat-card-title>
+          <button mat-icon-button class="close-button" (click)="closeEditDialog()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="editForm" class="record-form">
+            <div class="form-grid">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Vehicle</mat-label>
+                <mat-select formControlName="vehicle_id">
+                  @for (vehicle of vehicles(); track vehicle.id) {
+                    <mat-option [value]="vehicle.id">{{ vehicle.name }}</mat-option>
+                  }
+                </mat-select>
+                @if (getFieldError(editForm, 'vehicle_id')) {
+                  <mat-error>{{ getFieldError(editForm, 'vehicle_id') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Service Type</mat-label>
+                <mat-select formControlName="service_type_id">
+                  @for (type of serviceTypes(); track type.id) {
+                    <mat-option [value]="type.id">{{ type.name }}</mat-option>
+                  }
+                </mat-select>
+                @if (getFieldError(editForm, 'service_type_id')) {
+                  <mat-error>{{ getFieldError(editForm, 'service_type_id') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Performed Date</mat-label>
+                <input matInput type="date" formControlName="performed_at" />
+                @if (getFieldError(editForm, 'performed_at')) {
+                  <mat-error>{{ getFieldError(editForm, 'performed_at') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Odometer Miles</mat-label>
+                <input matInput type="number" formControlName="odometer_miles" />
+                @if (getFieldError(editForm, 'odometer_miles')) {
+                  <mat-error>{{ getFieldError(editForm, 'odometer_miles') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Shop Name</mat-label>
+                <input matInput type="text" formControlName="shop_name" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>DIY?</mat-label>
+                <mat-select formControlName="is_diy">
+                  <mat-option [value]="true">DIY</mat-option>
+                  <mat-option [value]="false">Shop</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Labor Cost</mat-label>
+                <input matInput type="number" formControlName="labor_cost" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Parts Cost</mat-label>
+                <input matInput type="number" formControlName="parts_cost" />
+              </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Quick Summary Notes</mat-label>
+              <textarea matInput rows="3" formControlName="notes"></textarea>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Detailed Note</mat-label>
+              <textarea matInput rows="3" formControlName="note"></textarea>
+              @if (getFieldError(editForm, 'note')) {
+                <mat-error>{{ getFieldError(editForm, 'note') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <div class="parts-section">
+              <p class="section-title">Parts Used</p>
+              <div class="parts-grid">
+                @for (part of parts(); track part.id) {
+                  <div class="part-row">
+                    <mat-checkbox
+                      [checked]="selectedEditPartIds().includes(part.id)"
+                      (change)="togglePart(part, $event.checked, true)">
+                      {{ part.name }}
+                    </mat-checkbox>
+                    <input
+                      type="number"
+                      min="1"
+                      class="part-qty"
+                      [value]="editPartQuantities()[part.id] || 1"
+                      (input)="updatePartQuantity(part.id, $any($event.target).value, true)" />
+                  </div>
+                }
+              </div>
+            @if (showEditPartsError()) {
+              <div class="parts-input-error">Select at least one part used.</div>
+            }
+            </div>
+            <mat-divider></mat-divider>
+
+            <div class="current-receipt">
+              <p class="section-title">Current Receipt Images</p>
+              @if (editPreviewUrl()) {
+                <img [src]="editPreviewUrl()" alt="Receipt" class="receipt-preview" />
+              } @else {
+                <div class="receipt-preview fallback-cover">
+                  <mat-icon>receipt_long</mat-icon>
+                </div>
+              }
+              <div class="record-meta">
+                Existing receipt images: {{ getOrderedReceiptImages(editingRecord()).length }}
+              </div>
+              <div class="record-meta">
+                Existing service images: {{ getOrderedServiceImages(editingRecord()).length }}
+              </div>
+            </div>
+
+            @if (getOrderedReceiptImages(editingRecord()).length > 0) {
+              <div class="gallery-block">
+                <p class="section-title">Receipt Gallery (ordered)</p>
+                <div class="image-gallery">
+                  @for (image of getOrderedReceiptImages(editingRecord()); track image.id + '-' + image.sort_order) {
+                    <div class="image-card">
+                      @if (image.file_url) {
+                        <img [src]="image.file_url" alt="Receipt image" class="gallery-image" />
+                      } @else {
+                        <div class="gallery-image fallback-cover">
+                          <mat-icon>receipt_long</mat-icon>
+                        </div>
+                      }
+                      <div class="order-pill">Order {{ image.sort_order }}</div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (getOrderedServiceImages(editingRecord()).length > 0) {
+              <div class="gallery-block">
+                <p class="section-title">Service Photo Gallery (ordered)</p>
+                <div class="image-gallery">
+                  @for (image of getOrderedServiceImages(editingRecord()); track image.id + '-' + image.sort_order) {
+                    <div class="image-card">
+                      @if (image.file_url) {
+                        <img [src]="image.file_url" alt="Service image" class="gallery-image" />
+                      } @else {
+                        <div class="gallery-image fallback-cover">
+                          <mat-icon>photo_camera</mat-icon>
+                        </div>
+                      }
+                      <div class="order-pill">Order {{ image.sort_order }}</div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <div class="form-group">
+              <label class="file-input-label">Replace Receipt Images (uploads overwrite old receipt images)</label>
+              <input
+                type="file"
+                accept="image/*"
+                class="file-input"
+                multiple
+                (change)="onEditReceiptFilesChange($event)" />
+              @if (selectedEditReceiptFiles().length > 0) {
+                <div class="selected-file">
+                  Selected {{ selectedEditReceiptFiles().length }} new receipt image(s)
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label class="file-input-label">Replace Service Images (uploads overwrite old service images)</label>
+              <input
+                type="file"
+                accept="image/*"
+                class="file-input"
+                multiple
+                (change)="onEditServiceFilesChange($event)" />
+              @if (selectedEditServiceFiles().length > 0) {
+                <div class="selected-file">
+                  Selected {{ selectedEditServiceFiles().length }} new service image(s)
+                </div>
+              }
+            </div>
+
+            @if (editErrorMessage()) {
+              <mat-card class="alert alert-danger">{{ editErrorMessage() }}</mat-card>
+            }
+
+            <div class="modal-footer">
+              <button mat-button type="button" (click)="closeEditDialog()">Cancel</button>
+              <button
+                mat-raised-button
+                color="primary"
+                type="button"
+                (click)="updateRecord()"
+                [disabled]="!canSubmitUpdate()">
+                @if (recordIsUpdating()) {
+                  <mat-spinner diameter="18"></mat-spinner>
+                  <span>Saving...</span>
+                } @else {
+                  <span>Save Changes</span>
+                }
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+}
+
+@if (deleteDialog()) {
+  <div class="modal" (click)="closeDeleteDialog()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <mat-card class="modal-content">
+        <mat-card-header class="modal-header">
+          <mat-card-title>Delete Service Record</mat-card-title>
+          <button mat-icon-button class="close-button" (click)="closeDeleteDialog()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <p>
+            Are you sure you want to delete the {{ selectedDeleteRecord()?.service_type?.name }} record
+            for {{ selectedDeleteRecord()?.vehicle?.name }}?
+          </p>
+          <p class="warning-text">ALL the data related to this record will be deleted.</p>
+        </mat-card-content>
+        <mat-card-actions class="modal-footer">
+          <button mat-button type="button" (click)="closeDeleteDialog()">Cancel</button>
+          <button
+            mat-raised-button
+            color="warn"
+            type="button"
+            (click)="deleteRecord()"
+            [disabled]="recordIsDeleting()">
+            @if (recordIsDeleting()) {
+              <mat-spinner diameter="18"></mat-spinner>
+              <span>Deleting...</span>
+            } @else {
+              <span>Delete</span>
+            }
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+}

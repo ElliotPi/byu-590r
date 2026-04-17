@@ -8,11 +8,16 @@ import {
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { Router } from '@angular/router';
 import {
   clearFormErrors,
   getFieldError,
@@ -33,11 +38,15 @@ import { VehiclesStore } from '../core/stores/vehicles.store';
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
+    MatChipsModule,
+    MatDividerModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatProgressBarModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    MatTooltipModule,
   ],
   templateUrl: './vehicles.component.html',
   styleUrl: './vehicles.component.scss',
@@ -46,9 +55,30 @@ export class VehiclesComponent implements OnInit {
   private vehiclesStore = inject(VehiclesStore);
   private fb = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
+  private router = inject(Router);
 
   vehicles = computed(() => this.vehiclesStore.vehicleRows());
   isLoading = computed(() => this.vehiclesStore.isLoading());
+  summaryCards = computed(() => {
+    const rows = this.vehicles();
+    return [
+      {
+        label: 'Tracked Vehicles',
+        value: rows.length,
+        icon: 'garage',
+      },
+      {
+        label: 'With Cover Image',
+        value: rows.filter((vehicle) => Boolean(vehicle.vehicle_picture)).length,
+        icon: 'image',
+      },
+      {
+        label: 'With Nickname',
+        value: rows.filter((vehicle) => Boolean(vehicle.nickname)).length,
+        icon: 'sell',
+      },
+    ];
+  });
 
   createVehicleDialog = signal(false);
   editVehicleDialog = signal(false);
@@ -150,6 +180,12 @@ export class VehiclesComponent implements OnInit {
   closeDeleteDialog(): void {
     this.selectedDeleteVehicle.set(null);
     this.deleteVehicleDialog.set(false);
+  }
+
+  openServiceLogs(vehicle: Vehicle): void {
+    this.router.navigate(['/service-records'], {
+      queryParams: { vehicleId: vehicle.id },
+    });
   }
 
   onCreateVehicleFileChange(event: Event): void {

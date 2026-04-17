@@ -26,5 +26,13 @@ export const routes: Routes = [
       import('./vehicles/vehicles.component').then((m) => m.VehiclesComponent),
     canActivate: [authGuard],
   },
+  {
+    path: 'service-records',
+    loadComponent: () =>
+      import('./service-records/service-records.component').then(
+        (m) => m.ServiceRecordsComponent
+      ),
+    canActivate: [authGuard],
+  },
   { path: '**', redirectTo: '/login' },
 ];

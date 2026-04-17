@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\HelloWorldController;
 use App\Http\Controllers\Api\RegisterController;
+use App\Http\Controllers\Api\ServiceRecordController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VehicleController;
 use Illuminate\Http\Request;
@@ -36,6 +37,9 @@ Route::middleware(\App\Http\Middleware\AuthenticateApi::class)->group(function (
     Route::resource('books', BookController::class);
     Route::resource('vehicles', VehicleController::class)
         ->parameters(['vehicles' => 'id'])
+        ->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('service-records', ServiceRecordController::class)
+        ->parameters(['service-records' => 'id'])
         ->only(['index', 'store', 'update', 'destroy']);
     Route::controller(VehicleController::class)->group(function () {
         Route::post('vehicles/generate_description', 'generateDescription');

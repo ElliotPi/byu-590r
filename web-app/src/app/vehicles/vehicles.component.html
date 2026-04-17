@@ -5,13 +5,28 @@
       <h2>Your Vehicles</h2>
     </div>
 
-    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+    <button mat-raised-button color="primary" matTooltip="Add a new vehicle to your garage" (click)="openCreateDialog()">
       <mat-icon>add</mat-icon>
       Create Vehicle
     </button>
   </div>
 
+  <div class="summary-grid">
+    @for (card of summaryCards(); track card.label) {
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-title">
+            <mat-icon>{{ card.icon }}</mat-icon>
+            <span>{{ card.label }}</span>
+          </div>
+          <div class="summary-value">{{ card.value }}</div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+
   @if (isLoading()) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
     <div class="state-card">Loading vehicles...</div>
   } @else {
     <div class="table-shell">
@@ -44,6 +59,10 @@
                 <div class="vehicle-meta">
                   {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}
                 </div>
+                <mat-chip-set>
+                  <mat-chip>{{ vehicle.make }}</mat-chip>
+                  <mat-chip>{{ vehicle.model }}</mat-chip>
+                </mat-chip-set>
                 @if (vehicle.nickname) {
                   <div class="vehicle-secondary">Nickname: {{ vehicle.nickname }}</div>
                 }
@@ -55,6 +74,15 @@
                 <button
                   mat-icon-button
                   color="primary"
+                  matTooltip="View service logs for this vehicle"
+                  (click)="openServiceLogs(vehicle)"
+                  aria-label="View service logs">
+                  <mat-icon>fact_check</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  color="primary"
+                  matTooltip="Edit this vehicle"
                   (click)="openEditDialog(vehicle)"
                   aria-label="Edit vehicle">
                   <mat-icon>edit</mat-icon>
@@ -62,6 +90,7 @@
                 <button
                   mat-icon-button
                   color="warn"
+                  matTooltip="Delete this vehicle"
                   (click)="openDeleteDialog(vehicle)"
                   aria-label="Delete vehicle">
                   <mat-icon>delete</mat-icon>
@@ -186,6 +215,7 @@
               <button
                 mat-stroked-button
                 color="primary"
+                matTooltip="Generate description using AI"
                 type="button"
                 [disabled]="descriptionIsGenerating()"
                 (click)="generateCreateDescription()">
@@ -200,6 +230,7 @@
                 }
               </button>
             </div>
+            <mat-divider></mat-divider>
 
             <div class="form-group">
               <label class="file-input-label">Vehicle Cover Image*</label>
@@ -348,6 +379,7 @@
               <button
                 mat-stroked-button
                 color="primary"
+                matTooltip="Generate description using AI"
                 type="button"
                 [disabled]="descriptionIsGenerating()"
                 (click)="generateEditDescription()">
@@ -362,6 +394,7 @@
                 }
               </button>
             </div>
+            <mat-divider></mat-divider>
 
             <div class="current-cover-section">
               <div class="current-cover-label">Current Vehicle Cover</div>

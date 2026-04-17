@@ -23,6 +23,9 @@ class DatabaseSeeder extends Seeder
             AuthorBooksSeeder::class,
             PageSeeder::class,
             VehiclesSeeder::class,
+            ServiceTypesSeeder::class,
+            PartsSeeder::class,
+            ServiceRecordsSeeder::class,
         ]);
     }
 }

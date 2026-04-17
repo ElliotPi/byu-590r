@@ -43,4 +43,9 @@ class Vehicle extends Model
     {
         return $this->hasMany(VehicleImage::class)->orderBy('sort_order')->orderBy('id');
     }
+
+    public function serviceRecords(): HasMany
+    {
+        return $this->hasMany(ServiceRecord::class);
+    }
 }
